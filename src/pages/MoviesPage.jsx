@@ -116,7 +116,7 @@ export default function MoviesPage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
             gap: 24
           }}>
-            {movies.map(movie => (
+            {Array.isArray(movies) && movies.map(movie => (
               <MovieCard key={movie.id} movie={movie}
                 onSelect={(id) => navigate(`/movies/${id}`)} />
             ))}
