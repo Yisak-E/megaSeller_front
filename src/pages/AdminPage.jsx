@@ -137,7 +137,10 @@ export default function AdminPage() {
     const iEs = new EventSource(`/api/admin/inventory-stream`)
     inventoryEsRef.current = iEs
     iEs.addEventListener('inventory', e => {
-      try { setInventory(JSON.parse(e.data)) } catch {}
+      try { 
+        const data = JSON.parse(e.data)
+        setInventory(Array.isArray(data) ? data : []) 
+      } catch {}
     })
 
     // ── Fallback polling if SSE token blocked (H2 dev quirk) ────────────
@@ -146,7 +149,7 @@ export default function AdminPage() {
       try {
         const [m, inv] = await Promise.all([getAdminMetrics(), getAdminInventory()])
         setMetrics(m)
-        setInventory(inv)
+        setInventory(Array.isArray(inv) ? inv : [])
         setConnected(true)
         setHistory(h => {
           const point = {
@@ -171,7 +174,7 @@ export default function AdminPage() {
   }, [auth?.token])
 
   // ─────────────────────────────────────────────────────────────────────────
-  const threads = metrics?.threads || []
+  const threads = Array.isArray(metrics?.threads) ? metrics.threads : []
   const lastH   = history[history.length - 1]
 
   const pieData = metrics ? [
@@ -318,7 +321,7 @@ export default function AdminPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {threads.map(t => <ThreadCard key={t.threadId} thread={t} />)}
+              {Array.isArray(threads) && threads.map(t => <ThreadCard key={t.threadId} thread={t} />)}
             </div>
           )}
         </div>
@@ -334,7 +337,7 @@ export default function AdminPage() {
           {inventory.length === 0 ? (
             <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Loading inventory…</div>
           ) : (
-            inventory.map(snap => <InventoryRow key={snap.showtimeId} snap={snap} />)
+            Array.isArray(inventory) && inventory.map(snap => <InventoryRow key={snap.showtimeId} snap={snap} />)
           )}
           {/* Colour key */}
           <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
